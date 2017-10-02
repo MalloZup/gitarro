@@ -20,13 +20,20 @@ rake test
 
 These tests use [rspec](http://rspec.info/) are not executed on travis, so you need to launch the execution manually.
 
-You can use the following command:
+
+**Run your tests always on your forked repo!**
+
+
+You need a fixed PR open for running some tests.
+
+Repo is the value of your forked repo
+
+PR_num is the pr of the fake repo on your forked repo (this is needed for testing)
 
 ```console
 cd tests/spec/
-rspec -fd gitarro_cmdline_spec.rb
+repo=MalloZup/gitarro pr_num=1 rspec -fd cmdline_spec.rb
 ```
-
 
 
 [Documentation index](../README.md#documentation)
