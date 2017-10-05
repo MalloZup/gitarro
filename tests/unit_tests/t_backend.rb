@@ -5,13 +5,14 @@ require_relative 'helper'
 Dir.chdir Dir.pwd
 # Test the option parser
 class BackendTest2 < Minitest::Test
-  def test_full_option_import2
+  def setup
     @full_hash = { repo: 'gino/gitarro', context: 'python-t', description:
                    'functional', test_file: 'gino.sh', file_type: '.sh',
-                   git_dir: 'gitty' }
+                   git_dir: 'gitty', changed_since: -1 }
+  end
+
+  def test_full_option_import2
     gitarro = Backend.new(@full_hash)
-    puts gitarro.j_status
-    gitarro.j_status = 'foo'
     gitarro_assert(gitarro)
   end
 
@@ -25,9 +26,7 @@ class BackendTest2 < Minitest::Test
   end
 
   def test_run_script
-    @full_hash = { repo: 'gino/gitarro', context: 'python-t', description:
-                   'functional', test_file: 'test_data/script_ok.sh',
-                   file_type: '.sh', git_dir: 'gitty' }
+    @full_hash[:test_file] = 'test_data/script_ok.sh'
     gbex = TestExecutor.new(@full_hash)
     ck_files(gbex)
     test_file = 'nofile.txt'
@@ -47,5 +46,25 @@ class BackendTest2 < Minitest::Test
     end
     assert_equal("'#{test_file}\' doesn't exists.Enter valid file, -t option",
                  ex.message)
+  end
+
+  # this test consume rate_limiting
+  # in travis we skip them, because they are failing
+  # locally they are fine.
+  def test_get_all_prs
+    skip if ENV['TRAVIS']
+    @full_hash[:repo] = 'openSUSE/gitarro'
+    gitarro = Backend.new(@full_hash)
+    prs = gitarro.open_newer_prs
+    assert(true, prs.any?)
+  end
+
+  def test_get_no_prs
+    skip if ENV['TRAVIS']
+    @full_hash[:repo] = 'openSUSE/gitarro'
+    @full_hash[:changed_since] = 0
+    gitarro = Backend.new(@full_hash)
+    prs = gitarro.open_newer_prs
+    assert(0, prs.count)
   end
 end
